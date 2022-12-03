@@ -25,6 +25,7 @@ getGroupBadge lst = nub $ intersect third $ intersect first second
           second = lst !! 1
           third = lst !! 2
 
+splitEvery :: Int -> [a] -> [[a]]
 splitEvery _ [] = []
 splitEvery n lst = first : (splitEvery n rest)
     where (first,rest) = splitAt n lst
@@ -32,10 +33,10 @@ splitEvery n lst = first : (splitEvery n rest)
 
 
 part1 :: String -> Priority
-part1 = sum . map (getLinePriority) . map (getIntersect) . map (splitLine) . lines
+part1 = sum . map (getLinePriority . getIntersect . splitLine) . lines
 
 part2 :: String -> Priority
-part2 = sum . map (getLinePriority) . map (getGroupBadge) . splitEvery 3 . lines
+part2 = sum . map (getLinePriority . getGroupBadge) . splitEvery 3 . lines
 
 main :: IO ()
 main = do 
