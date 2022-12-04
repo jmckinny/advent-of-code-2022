@@ -60,7 +60,7 @@ computeScorePart2 (opponent,player) = gestureScore + outcomeScore
 
 parseLine :: String -> (Gesture,Gesture)
 parseLine l =  (head gestures,last gestures)
-    where gestures = map (letterToGesture) $ filter (not . isSpace) l
+    where gestures = map letterToGesture $ filter (not . isSpace) l
 
 parseLine2 :: String -> (Gesture,Outcome)
 parseLine2 l =  (letterToGesture $ head trimmed, letterToOutcome $ last trimmed)
@@ -98,5 +98,5 @@ main :: IO ()
 main = do 
     handle <- openFile "input.txt" ReadMode
     contents <- hGetContents handle
-    print $ "Part1: " ++ (show $ computeTotalScorePart1 $ lines $ contents)
-    print $ "Part2: " ++ (show $ computeTotalScorePart2 $ lines $ contents)
+    print $ "Part1: " ++ show (computeTotalScorePart1 $ lines contents)
+    print $ "Part2: " ++ show (computeTotalScorePart2 $ lines contents)
