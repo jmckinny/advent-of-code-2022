@@ -10,8 +10,10 @@ type Stacks = Vec<VecDeque<char>>;
 fn main() {
     let input = read_input(Path::new("input.txt"));
     let mut stacks = parse_stacks(&input);
+    let mut stacks2 = parse_stacks(&input);
     let commands: Vec<Command> = input.lines().skip(10).map(parse_command).collect();
     println!("Part1: {}", part1(&mut stacks, &commands));
+    println!("Part2: {}", part2(&mut stacks2, &commands));
 }
 
 fn part1(stacks: &mut Stacks, commands: &Vec<Command>) -> String {
@@ -23,6 +25,24 @@ fn part1(stacks: &mut Stacks, commands: &Vec<Command>) -> String {
         let removed = stacks[from - 1].drain(0..amount).collect::<Vec<char>>();
         for item in removed {
             stacks[to - 1].push_front(item);
+        }
+    }
+
+    for stack in stacks {
+        result.push(*stack.get(0).unwrap());
+    }
+    result
+}
+
+fn part2(stacks: &mut Stacks, commands: &Vec<Command>) -> String {
+    let mut result = String::new();
+    for command in commands {
+        let amount = command.amount;
+        let from = command.from;
+        let to = command.to;
+        let removed = stacks[from - 1].drain(0..amount).collect::<Vec<char>>();
+        for item in removed.iter().rev() {
+            stacks[to - 1].push_front(*item);
         }
     }
 
