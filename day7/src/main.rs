@@ -2,18 +2,40 @@ use std::{
     collections::HashMap,
     path::{Path, PathBuf},
 };
+mod file_system;
 mod terminal;
 
 const COMMAND_PREFIX: &str = "$";
 const DIR_PREFIX: &str = "dir ";
 fn main() {
     let commands = parse_commands(Path::new("input.txt"));
-    println!("Part1: {}", part1(&commands));
+    println!("Part1: {:?}", part1(&commands));
+    println!("Part2: {:?}", part2(&commands));
+}
+
+fn part2(commands: &Vec<terminal::Command>) -> usize {
+    let total = 70000000;
+    let needed = 30000000;
+    let sizes = compute_file_sizes(commands);
+    let cur_used = *sizes.values().max().unwrap();
+    let mut best = usize::MAX;
+    for (_, size) in sizes {
+        let possible_free = total - cur_used + size;
+        if possible_free >= needed && size < best {
+            best = size;
+        }
+    }
+    best
 }
 
 fn part1(commands: &Vec<terminal::Command>) -> usize {
-    let mut cur_path = PathBuf::new();
+    let sizes = compute_file_sizes(commands);
+    sizes.values().filter(|x| **x <= 100000).sum()
+}
 
+fn compute_file_sizes(commands: &Vec<terminal::Command>) -> HashMap<String, usize> {
+    let mut cur_path = PathBuf::new();
+    let mut dirs: HashMap<String, file_system::Directory> = HashMap::new();
     for command in commands {
         match command {
             terminal::Command::Cd(dir_name) => {
@@ -24,11 +46,57 @@ fn part1(commands: &Vec<terminal::Command>) -> usize {
                 }
             }
             terminal::Command::Ls(outputs) => {
-                todo!()
+                let mut local_size = 0;
+                let mut sub_dir = Vec::new();
+                for x in outputs {
+                    match x {
+                        terminal::Output::Directory(dir_name) => {
+                            let mut name = cur_path.to_str().unwrap().to_string();
+                            if name != "/" {
+                                name.push('/')
+                            }
+                            name.push_str(dir_name);
+                            sub_dir.push(name);
+                        }
+                        terminal::Output::FileEntry(f) => {
+                            local_size += f.size;
+                        }
+                    }
+                }
+                dirs.insert(
+                    cur_path.to_str().unwrap().to_string(),
+                    file_system::Directory {
+                        name: cur_path.to_str().unwrap().to_string(),
+                        local_size,
+                        sub_dirs: sub_dir,
+                    },
+                );
             }
         }
     }
-    0
+    let mut result = HashMap::new();
+    for d in dirs.clone().keys() {
+        result.insert(d.to_string(), calc_dir_size(d, &mut dirs));
+    }
+    result
+}
+
+fn calc_dir_size(name: &str, dirs: &mut HashMap<String, file_system::Directory>) -> usize {
+    if dirs
+        .get(name)
+        .unwrap_or_else(|| panic!("{} not present", name))
+        .sub_dirs
+        .is_empty()
+    {
+        return dirs.get(name).unwrap().local_size;
+    } else {
+        let mut result = 0;
+        let sub_dirs = dirs.get(name).unwrap().sub_dirs.clone();
+        for sub_dir in sub_dirs {
+            result += calc_dir_size(&sub_dir, dirs);
+        }
+        result + dirs.get(name).unwrap().local_size
+    }
 }
 
 fn parse_commands(input: &Path) -> Vec<terminal::Command> {
