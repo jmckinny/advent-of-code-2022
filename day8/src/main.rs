@@ -6,18 +6,18 @@ fn main() {
     println!("Part2 {}", part2(&data));
 }
 
-fn part2(data: &Vec<Vec<u8>>) -> u32{
+fn part2(data: &[Vec<u8>]) -> u32 {
     let mut best = 0;
-    for row in 0..data.len(){
-        for col in 0..data[row].len(){
-            let score = calc_scenic_score(data,row,col);
+    for row in 0..data.len() {
+        for col in 0..data[row].len() {
+            let score = calc_scenic_score(data, row, col);
             best = best.max(score);
         }
     }
     best
 }
 
-fn part1(data: &Vec<Vec<u8>>) -> u32 {
+fn part1(data: &[Vec<u8>]) -> u32 {
     let mut result = 0;
     for row in 0..data.len() {
         for col in 0..data[row].len() {
@@ -29,7 +29,7 @@ fn part1(data: &Vec<Vec<u8>>) -> u32 {
     result
 }
 
-fn calc_scenic_score(data: &Vec<Vec<u8>>, row: usize, col: usize) -> u32 {
+fn calc_scenic_score(data: &[Vec<u8>], row: usize, col: usize) -> u32 {
     let value = data[row][col];
     top_score(data, value, row, col)
         * bot_score(data, value, row, col)
@@ -37,43 +37,43 @@ fn calc_scenic_score(data: &Vec<Vec<u8>>, row: usize, col: usize) -> u32 {
         * right_score(data, value, row, col)
 }
 
-fn top_score(data: &Vec<Vec<u8>>, value: u8, row: usize, col: usize) -> u32 {
+fn top_score(data: &[Vec<u8>], value: u8, row: usize, col: usize) -> u32 {
     for i in (0..row).rev() {
         if data[i][col] >= value {
-            return (row-i) as u32;
+            return (row - i) as u32;
         }
     }
     row as u32
 }
 
-fn bot_score(data: &Vec<Vec<u8>>, value: u8, row: usize, col: usize) -> u32 {
-    for i in (row+1)..data.len() {
-        if data[i][col] >= value {
-            return (i-row) as u32;
+fn bot_score(data: &[Vec<u8>], value: u8, row: usize, col: usize) -> u32 {
+    for (i, cur_row) in data.iter().enumerate().skip(row + 1) {
+        if cur_row[col] >= value {
+            return (i - row) as u32;
         }
     }
-    (data.len()-1 - row) as u32
+    (data.len() - 1 - row) as u32
 }
 
-fn left_score(data: &Vec<Vec<u8>>, value: u8, row: usize, col: usize) -> u32 {
+fn left_score(data: &[Vec<u8>], value: u8, row: usize, col: usize) -> u32 {
     for i in (0..col).rev() {
         if data[row][i] >= value {
-            return (col-i) as u32;
+            return (col - i) as u32;
         }
     }
     col as u32
 }
 
-fn right_score(data: &Vec<Vec<u8>>, value: u8, row: usize, col: usize) -> u32 {
+fn right_score(data: &[Vec<u8>], value: u8, row: usize, col: usize) -> u32 {
     for i in (col + 1)..data[0].len() {
         if data[row][i] >= value {
             return (i - col) as u32;
         }
     }
-    (data[0].len()-1 - col) as u32
+    (data[0].len() - 1 - col) as u32
 }
 
-fn is_visable(data: &Vec<Vec<u8>>, row: usize, col: usize) -> bool {
+fn is_visable(data: &[Vec<u8>], row: usize, col: usize) -> bool {
     if row == 0 || row == data.len() - 1 || col == 0 || col == data[0].len() - 1 {
         return true;
     }
@@ -85,25 +85,25 @@ fn is_visable(data: &Vec<Vec<u8>>, row: usize, col: usize) -> bool {
         || is_right_visable(data, cur_height, row, col)
 }
 
-fn is_top_visable(data: &Vec<Vec<u8>>, value: u8, row: usize, col: usize) -> bool {
-    for i in 0..row {
-        if data[i][col] >= value {
+fn is_top_visable(data: &[Vec<u8>], value: u8, row: usize, col: usize) -> bool {
+    for cur_row in data.iter().take(row) {
+        if cur_row[col] >= value {
             return false;
         }
     }
     true
 }
 
-fn is_bot_visable(data: &Vec<Vec<u8>>, value: u8, row: usize, col: usize) -> bool {
-    for i in row + 1..data.len() {
-        if data[i][col] >= value {
+fn is_bot_visable(data: &[Vec<u8>], value: u8, row: usize, col: usize) -> bool {
+    for cur_row in data.iter().skip(row + 1) {
+        if cur_row[col] >= value {
             return false;
         }
     }
     true
 }
 
-fn is_left_visable(data: &Vec<Vec<u8>>, value: u8, row: usize, col: usize) -> bool {
+fn is_left_visable(data: &[Vec<u8>], value: u8, row: usize, col: usize) -> bool {
     for i in 0..col {
         if data[row][i] >= value {
             return false;
@@ -112,7 +112,7 @@ fn is_left_visable(data: &Vec<Vec<u8>>, value: u8, row: usize, col: usize) -> bo
     true
 }
 
-fn is_right_visable(data: &Vec<Vec<u8>>, value: u8, row: usize, col: usize) -> bool {
+fn is_right_visable(data: &[Vec<u8>], value: u8, row: usize, col: usize) -> bool {
     for i in col + 1..data[0].len() {
         if data[row][i] >= value {
             return false;
